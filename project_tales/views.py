@@ -3,9 +3,9 @@ from django.views.generic import View
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 
-import pixellib
-from pixellib.custom_train import instance_custom_training
-from pixellib.instance import custom_segmentation
+#import pixellib
+#from pixellib.custom_train import instance_custom_training
+#from pixellib.instance import custom_segmentation
 # Create your views here.
 
 class TalesView(View):
