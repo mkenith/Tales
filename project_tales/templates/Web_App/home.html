@@ -10,7 +10,69 @@
             max-width: 750px;
             padding: 15px;
         }
+        .loader {
+            border-top: 10px solid blue;
+  border-right: 10px solid green;
+  border-bottom: 10px solid red;
+  border-left: 10px solid pink;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+         $(document).ready(function() {
+                $('#submit').click(function(e) {
+                    e.preventDefault();  // disables submit's default action
+                    var data = new FormData($('#ajax').get(0));
+                    var upload = document.getElementById("upload")
+                    var download = document.getElementById("download")
+                    var loader = document.getElementById("loader")
+                    loader.hidden = false;
+                    console.log(data);
+
+                    $.ajax({
+                        url: 'upload/',
+                        type: 'POST',
+                        data: data,
+                        processData: false,
+                        contentType: false,
+                        success: function(data) {
+                            data = JSON.parse(data); // converts string of json to object
+                            //$('#photo').html('<img src="'+data.url+ '" />');
+                            // <h2>title</h2> You do not use 'title' in your project !!
+                            // alt=title see previous comment
+                            console.log("success men");
+                            loader.hidden=true;
+                            console.log(data)
+                            var a = document.getElementById("download_link");
+                            if(data.valid=="yes"){
+                                a.href = "{% get_media_prefix %}"+data.data;
+                                download.disabled = false;
+                            }
+                            else{
+                                //do something
+                                download.disabled = true;
+                                alert("Image Segmentation Failed. Please select another image.")
+                            }
+                            
+                        }
+                    });
+                    return false;
+                });
+                $("#download").on('click',function(){
+                    console.log("download button is clicked");
+                    document.getElementById("download_link").click();
+                });
+            });
+    </script>
 </head>
 
 <body>
@@ -19,7 +81,7 @@
         <h1>
             <a target="_blank" href="#">Project Tales</a>
         </h1>
-        <form method="POST" enctype="multipart/form-data">
+        <form enctype="multipart/form-data" id ="ajax">
             {% csrf_token %}
             <div class="well" data-bind="fileDrag: fileData">
                 <div class="form-group row">
@@ -30,7 +92,7 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <input type="file" name="imagefile" data-bind="fileInput: fileData, customFileInput: {
+                        <input type="file" name="img" data-bind="fileInput: fileData, customFileInput: {
 	              buttonClass: 'btn btn-success',
 	              fileNameClass: 'disabled form-control',
 	              onClear: onClear,
@@ -39,15 +101,26 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+            <button type="button" id="submit" name="upload" class="btn btn-primary">Upload</button>
         </form>
+        <br>
+        <div>
+           <div class="loader" id="loader" hidden></div>
+           <br>
+          <!--  <a id="download_link" href="{% get_media_prefix %}output.stl" download hidden>Download File</a> -->
+          <a id="download_link" href="" download hidden>Download File</a>
+          <button type="button" id="download" name="download" class="btn btn-primary" disabled >Download</button>
+        </div>
+
+        <!--
         <h3>Multiple File Uploads</h3>
         <div class="well" data-bind="fileDrag: multiFileData">
             <div class="form-group row">
                 <div class="col-md-6">
-                    <!-- ko foreach: {data: multiFileData().dataURLArray, as: 'dataURL'} -->
+            
+                     ko foreach: {data: multiFileData().dataURLArray, as: 'dataURL'} 
                     <img style="height: 100px; margin: 5px;" class="img-rounded  thumb" data-bind="attr: { src: dataURL }, visible: dataURL">
-                    <!-- /ko -->
+                     /ko 
                     <div data-bind="ifnot: fileData().dataURL">
                         <label class="drag-label">Drag files here</label>
                     </div>
@@ -64,10 +137,13 @@
         </div>
         <button class="btn btn-default" data-bind="click: debug">debug</button>
     </div>
+-->
 
     <script src='http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js'></script>
     <script src="{% static '/Web_App/knockout-file-bindings.js' %}"></script>
     <script>
+        
+
         var viewModel = {};
         viewModel.fileData = ko.observable({
             dataURL: ko.observable(),
